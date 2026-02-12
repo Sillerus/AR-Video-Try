@@ -10,14 +10,20 @@
     embedded
     vr-mode-ui="enabled: false"
     renderer="logarithmicDepthBuffer: true;"
-    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+    arjs="sourceType: webcam;
+          trackingMethod: best;
+          debugUIEnabled: false;
+          smooth: true;
+          smoothCount: 10;
+          smoothTolerance: 0.01;
+          smoothThreshold: 5;"
   >
 
-    <!-- Загружаем видео в assets (как советуют в AR.js issue) -->
+    <!-- Видео в assets -->
     <a-assets>
       <video
         id="myVideo"
-        src="https://raw.githack.com/Sillerus/AR-Video-Try/refs/heads/main/IMG_5706.mp4"
+        src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
         autoplay
         loop
         muted
@@ -26,20 +32,17 @@
       ></video>
     </a-assets>
 
-    <!-- Твой кастомный QR-маркер -->
+    <!-- Кастомный QR-маркер -->
     <a-marker
       type="pattern"
       url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr.patt"
       smooth="true"
-      smoothCount="10"
-      smoothTolerance="0.01"
-      smoothThreshold="5"
     >
       <a-video
         src="#myVideo"
         position="0 0 0"
         rotation="-90 0 0"
-        scale="1 1 1"
+        scale="0.8 0.8 0.8"
         width="2"
         height="1.125"
       ></a-video>
