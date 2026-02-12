@@ -7,13 +7,6 @@
 </head>
 <body style="margin:0; padding:0; overflow:hidden;">
 
-  <!-- Кнопка запуска (изначально скрыта, покажем когда увидим QR) -->
-  <button id="startBtn"
-          style="position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);
-                 padding:12px 20px;font-size:16px;display:none;">
-    Запустить видео
-  </button>
-
   <a-scene
     embedded
     vr-mode-ui="enabled: false"
@@ -27,66 +20,58 @@
       <video
         id="myVideo"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
+        autoplay
         loop
+        muted
         playsinline
         crossorigin="anonymous"
       ></video>
     </a-assets>
 
-    <!-- QR-маркер: только для детекта -->
+    <!-- QR-маркер -->
     <a-marker
       id="marker"
       type="pattern"
       url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr.patt"
       smooth="true"
     >
-    </a-marker>
-
-    <!-- Экран видео фиксирован перед камерой, по умолчанию скрыт -->
-    <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 -2"
-        rotation="0 0 0"
+        position="0 0 0"
+        rotation="-90 0 0"
         width="3"
         height="1.6875"
       ></a-video>
-    </a-entity>
+    </a-marker>
 
-    <a-entity id="camera" camera></a-entity>
+    <a-entity camera></a-entity>
   </a-scene>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const marker = document.getElementById('marker');
-      const startBtn = document.getElementById('startBtn');
       const video = document.getElementById('myVideo');
-      const container = document.getElementById('videoContainer');
 
-      let markerSeen = false;
-      let videoStarted = false;
-
-      // 1. Показать кнопку, когда QR найден впервые
+      // Автоплей (без звука) при появлении маркера
       marker.addEventListener('markerFound', () => {
-        if (!markerSeen && !videoStarted) {
-          markerSeen = true;
-          startBtn.style.display = 'block';
+        if (video.paused) {
+          video.muted = true;    // важно для автоплея
+          video.play().catch(() => {});
         }
       });
 
-      // 2. По клику запускаем видео + показываем экран перед камерой
-      startBtn.addEventListener('click', async () => {
-        try {
-          // включаем звук
-          video.muted = false;
+      // Остановка, если маркер потерян
+      marker.addEventListener('markerLost', () => {
+        if (!video.paused) {
+          video.pause();
+        }
+      });
 
-          await video.play();           // user gesture → звук разрешён
-          container.setAttribute('visible', 'true');
-          startBtn.style.display = 'none';
-          videoStarted = true;
-        } catch (e) {
-          console.log('Не удалось запустить видео:', e);
+      // Один тап по экрану — включаем звук (если видео уже идёт)
+      window.addEventListener('click', () => {
+        if (!video.paused) {
+          video.muted = false;
         }
       });
     });
