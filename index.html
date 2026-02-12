@@ -21,13 +21,11 @@
         id="myVideo"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
         loop
-        muted
         playsinline
         crossorigin="anonymous"
       ></video>
     </a-assets>
 
-    <!-- QR-маркер: только триггер -->
     <a-marker
       id="marker"
       type="pattern"
@@ -36,12 +34,11 @@
     >
     </a-marker>
 
-    <!-- Небольшой вертикальный экран перед камерой -->
     <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 -1.5"   <!-- ближе и меньше -->
+        position="0 0 -1.5"
         rotation="0 0 0"
         width="0.6"
         height="1.1"
@@ -59,29 +56,31 @@
       const container = document.getElementById('videoContainer');
       const videoPlane = document.getElementById('videoPlane');
 
-      let started = false;
-      let unmuted = false;
+      let markerSeen = false;
+      let playing = false;
 
-      // 1) Один раз: навёл на QR → показываем экран и запускаем видео без звука
-      marker.addEventListener('markerFound', async () => {
-        if (started) return;
-        container.setAttribute('visible', 'true');
-        video.muted = true;
-        try {
-          await video.play();           // автоплей (без звука)
-          started = true;
-        } catch (e) {
-          console.log('Автозапуск не сработал:', e);
+      // Показываем экран только после первого сканирования QR
+      marker.addEventListener('markerFound', () => {
+        if (!markerSeen) {
+          markerSeen = true;
+          container.setAttribute('visible', 'true');
         }
       });
 
-      // 2) Тап по самому видео → включаем звук (паттерн из рабочих примеров)
-      videoPlane.addEventListener('click', () => {
-        if (!started) return;
-        if (unmuted) return;
-        video.muted = false;
-        video.play().catch(() => {});
-        unmuted = true;
+      // ОДИН клик по самому видео: старт с звуком
+      videoPlane.addEventListener('click', async () => {
+        try {
+          if (!playing) {
+            video.muted = false;
+            await video.play();
+            playing = true;
+          } else {
+            video.pause();
+            playing = false;
+          }
+        } catch (e) {
+          console.log('Ошибка play():', e);
+        }
       });
     });
   </script>
