@@ -115,56 +115,12 @@
       emitevents="true"
     ></a-marker>
 
-    <!-- ЭКРАНЫ ВИДЕО ПЕРЕД КАМЕРОЙ -->
-    <!-- Видео 1 -->
-    <a-entity id="container1" visible="false">
+    <!-- ОДИН общий экран перед камерой -->
+    <a-entity id="videoContainer" visible="false">
       <a-video
-        src="#video1"
-        position="-0.6 0 -3"   <!-- немного слева -->
-        rotation="0 0 0"
-        width="0.25"
-        height="0.45"
-      ></a-video>
-    </a-entity>
-
-    <!-- Видео 2 -->
-    <a-entity id="container2" visible="false">
-      <a-video
-        src="#video2"
-        position="0.6 0 -3"    <!-- немного справа -->
-        rotation="0 0 0"
-        width="0.25"
-        height="0.45"
-      ></a-video>
-    </a-entity>
-
-    <!-- Видео 3 -->
-    <a-entity id="container3" visible="false">
-      <a-video
-        src="#video3"
-        position="-0.6 0.8 -3" <!-- левый верх -->
-        rotation="0 0 0"
-        width="0.25"
-        height="0.45"
-      ></a-video>
-    </a-entity>
-
-    <!-- Видео 4 -->
-    <a-entity id="container4" visible="false">
-      <a-video
-        src="#video4"
-        position="0.6 0.8 -3"  <!-- правый верх -->
-        rotation="0 0 0"
-        width="0.25"
-        height="0.45"
-      ></a-video>
-    </a-entity>
-
-    <!-- Видео 5 -->
-    <a-entity id="container5" visible="false">
-      <a-video
-        src="#video5"
-        position="0  -0.8 -3"  <!-- по центру снизу -->
+        id="videoPlane"
+        src="#video1"          <!-- по умолчанию любое -->
+        position="0 0 -3"     <!-- одна и та же позиция для всех -->
         rotation="0 0 0"
         width="0.25"
         height="0.45"
@@ -176,51 +132,50 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Маркеры
-      const markers = [
-        { markerId: 'marker1', videoId: 'video1', containerId: 'container1' },
-        { markerId: 'marker2', videoId: 'video2', containerId: 'container2' },
-        { markerId: 'marker3', videoId: 'video3', containerId: 'container3' },
-        { markerId: 'marker4', videoId: 'video4', containerId: 'container4' },
-        { markerId: 'marker5', videoId: 'video5', containerId: 'container5' },
+      const configs = [
+        { markerId: 'marker1', videoId: 'video1' },
+        { markerId: 'marker2', videoId: 'video2' },
+        { markerId: 'marker3', videoId: 'video3' },
       ];
 
-      let activeIndex = null;       // какой сейчас активен для звука
-      let audioEnabled = false;     // включали ли звук уже
+      const container = document.getElementById('videoContainer');
+      const videoPlane = document.getElementById('videoPlane');
 
-      // Для каждого маркера: при первом детекте показать свой экран и запустить видео без звука
-      markers.forEach((conf, index) => {
+      let activeVideo = null;   // текущий видеоэлемент для звука
+      let containerShown = false;
+
+      // При сканировании конкретного QR подставляем в экран его видео и запускаем его без звука
+      configs.forEach(conf => {
         const marker = document.getElementById(conf.markerId);
         const video = document.getElementById(conf.videoId);
-        const container = document.getElementById(conf.containerId);
-
-        let triggered = false;
 
         marker.addEventListener('markerFound', async () => {
-          if (triggered) return;
-          triggered = true;
-          container.setAttribute('visible', 'true');
+          // Поменять источник у общего экрана
+          videoPlane.setAttribute('src', `#${conf.videoId}`);
+          activeVideo = video;
+
+          if (!containerShown) {
+            container.setAttribute('visible', 'true');
+            containerShown = true;
+          }
+
           video.muted = true;
           try {
             await video.play();
           } catch (e) {
             console.log('Автозапуск не сработал для', conf.videoId, e);
           }
-          // последний увиденный маркер — активный для звука
-          activeIndex = index;
         });
       });
 
-      // Один тап по экрану → включаем звук у последнего активного видео
+      // Один тап по экрану → включаем звук у текущего активного видео
       window.addEventListener('click', async () => {
-        if (activeIndex === null) return;
-        const conf = markers[activeIndex];
-        const video = document.getElementById(conf.videoId);
+        if (!activeVideo) return;
         try {
-          video.muted = false;
-          await video.play();
+          activeVideo.muted = false;
+          await activeVideo.play();
         } catch (e) {
-          console.log('Не удалось включить звук для', conf.videoId, e);
+          console.log('Не удалось включить звук', e);
         }
       });
     });
