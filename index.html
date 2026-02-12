@@ -119,11 +119,11 @@
     <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
-        src="#video1"          <!-- по умолчанию любое -->
-        position="0 0 -3"     <!-- одна и та же позиция для всех -->
+        src="#video1"
+        position="0 0 -2"
         rotation="0 0 0"
-        width="0.25"
-        height="0.45"
+        width="0.3"
+        height="0.54"
       ></a-video>
     </a-entity>
 
@@ -131,83 +131,77 @@
   </a-scene>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const configs = [
-      { markerId: 'marker1', videoId: 'video1' },
-      { markerId: 'marker2', videoId: 'video2' },
-      { markerId: 'marker3', videoId: 'video3' },
-	  { markerId: 'marker4', videoId: 'video4' },
-	  { markerId: 'marker5', videoId: 'video5' },
-    ];
+    document.addEventListener('DOMContentLoaded', () => {
+      const configs = [
+        { markerId: 'marker1', videoId: 'video1' },
+        { markerId: 'marker2', videoId: 'video2' },
+        { markerId: 'marker3', videoId: 'video3' },
+        { markerId: 'marker4', videoId: 'video4' },
+        { markerId: 'marker5', videoId: 'video5' },
+      ];
 
-    const container = document.getElementById('videoContainer');
-    const videoPlane = document.getElementById('videoPlane');
+      const container = document.getElementById('videoContainer');
+      const videoPlane = document.getElementById('videoPlane');
 
-    // сами <video> элементы
-    const videos = {
-      video1: document.getElementById('video1'),
-      video2: document.getElementById('video2'),
-      video3: document.getElementById('video3'),
-	  video4: document.getElementById('video4'),
-	  video5: document.getElementById('video5'),
-    };
+      const videos = {
+        video1: document.getElementById('video1'),
+        video2: document.getElementById('video2'),
+        video3: document.getElementById('video3'),
+        video4: document.getElementById('video4'),
+        video5: document.getElementById('video5'),
+      };
 
-    let activeKey = null;      // 'video1' | 'video2' | 'video3'
-    let containerShown = false;
+      let activeKey = null;
+      let containerShown = false;
 
-    // Функция: остановить все видео
-    function stopAllVideos() {
-      Object.values(videos).forEach(v => {
-        v.pause();
-        v.currentTime = 0;
-        v.muted = true;
+      function stopAllVideos() {
+        Object.values(videos).forEach(v => {
+          v.pause();
+          v.currentTime = 0;
+          v.muted = true;
+        });
+      }
+
+      // Навёл на конкретный QR → показываем экран по центру и подставляем его видео
+      configs.forEach(conf => {
+        const marker = document.getElementById(conf.markerId);
+
+        marker.addEventListener('markerFound', async () => {
+          const key = conf.videoId;
+          const video = videos[key];
+
+          if (!containerShown) {
+            container.setAttribute('visible', 'true');
+            containerShown = true;
+          }
+
+          stopAllVideos();
+
+          videoPlane.setAttribute('src', `#${key}`);
+          activeKey = key;
+
+          try {
+            video.muted = true;
+            await video.play();
+          } catch (e) {
+            console.log('Автозапуск не сработал для', key, e);
+          }
+        });
       });
-    }
 
-    // При сканировании конкретного QR
-    configs.forEach(conf => {
-      const marker = document.getElementById(conf.markerId);
-
-      marker.addEventListener('markerFound', async () => {
-        const key = conf.videoId;       // 'video1' / 'video2' / 'video3'
-        const video = videos[key];
-
-        // Показать контейнер один раз
-        if (!containerShown) {
-          container.setAttribute('visible', 'true');
-          containerShown = true;
-        }
-
-        // Остановить всё остальное
-        stopAllVideos();
-
-        // Подставить нужное видео в плейн
-        videoPlane.setAttribute('src', `#${key}`);
-        activeKey = key;
-
-        // Запустить это видео без звука
+      // Один тап по экрану → включаем звук у текущего активного видео
+      window.addEventListener('click', async () => {
+        if (!activeKey) return;
+        const video = videos[activeKey];
         try {
-          video.muted = true;
+          video.muted = false;
           await video.play();
         } catch (e) {
-          console.log('Автозапуск не сработал для', key, e);
+          console.log('Не удалось включить звук для', activeKey, e);
         }
       });
     });
-
-    // Один тап по экрану → включаем звук у текущего активного видео
-    window.addEventListener('click', async () => {
-      if (!activeKey) return;
-      const video = videos[activeKey];
-      try {
-        video.muted = false;
-        await video.play();   // перезапуск с аудио
-      } catch (e) {
-        console.log('Не удалось включить звук для', activeKey, e);
-      }
-    });
-  });
-</script>
+  </script>
 
 </body>
 </html>
