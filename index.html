@@ -16,10 +16,52 @@
           debugUIEnabled: false;"
   >
 
+    <!-- ВСЕ ВИДЕО-РЕСУРСЫ -->
     <a-assets>
+      <!-- Видео 1 (текущее) -->
       <video
-        id="myVideo"
+        id="video1"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
+        loop
+        muted
+        playsinline
+        crossorigin="anonymous"
+      ></video>
+
+      <!-- Видео 2 -->
+      <video
+        id="video2"
+        src="https://raw.githack.com/Sillerus/AR-Video-Try/main/Videos/IMG_3485.MP4?raw=true"
+        loop
+        muted
+        playsinline
+        crossorigin="anonymous"
+      ></video>
+
+      <!-- Видео 3 -->
+      <video
+        id="video3"
+        src="https://raw.githack.com/Sillerus/AR-Video-Try/main/Videos/IMG_3487.MP4?raw=true"
+        loop
+        muted
+        playsinline
+        crossorigin="anonymous"
+      ></video>
+
+      <!-- Видео 4 -->
+      <video
+        id="video4"
+        src="https://raw.githack.com/Sillerus/AR-Video-Try/main/Videos/IMG_3489.MP4?raw=true"
+        loop
+        muted
+        playsinline
+        crossorigin="anonymous"
+      ></video>
+
+      <!-- Видео 5 -->
+      <video
+        id="video5"
+        src="https://raw.githack.com/Sillerus/AR-Video-Try/main/Videos/IMG_3492.MP4?raw=true"
         loop
         muted
         playsinline
@@ -27,24 +69,105 @@
       ></video>
     </a-assets>
 
+    <!-- МАРКЕРЫ (QR-паттерны) -->
+    <!-- Маркер 1 -->
     <a-marker
-      id="marker"
+      id="marker1"
       type="pattern"
       url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr.patt"
       smooth="true"
       emitevents="true"
-    >
-    </a-marker>
+    ></a-marker>
 
-    <!-- Экран примерно с размер QR -->
-    <a-entity id="videoContainer" visible="false">
+    <!-- Маркер 2 -->
+    <a-marker
+      id="marker2"
+      type="pattern"
+      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr (2).patt"
+      smooth="true"
+      emitevents="true"
+    ></a-marker>
+
+    <!-- Маркер 3 -->
+    <a-marker
+      id="marker3"
+      type="pattern"
+      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr (3).patt"
+      smooth="true"
+      emitevents="true"
+    ></a-marker>
+
+    <!-- Маркер 4 -->
+    <a-marker
+      id="marker4"
+      type="pattern"
+      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr (4).patt"
+      smooth="true"
+      emitevents="true"
+    ></a-marker>
+
+    <!-- Маркер 5 -->
+    <a-marker
+      id="marker5"
+      type="pattern"
+      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr (5).patt"
+      smooth="true"
+      emitevents="true"
+    ></a-marker>
+
+    <!-- ЭКРАНЫ ВИДЕО ПЕРЕД КАМЕРОЙ -->
+    <!-- Видео 1 -->
+    <a-entity id="container1" visible="false">
       <a-video
-        id="videoPlane"
-        src="#myVideo"
-        position="0 0 -5"    <!-- дальше от камеры -->
+        src="#video1"
+        position="-0.6 0 -3"   <!-- немного слева -->
         rotation="0 0 0"
-        width="0.9"         <!-- ширина примерно как QR 5–6 см -->
-        height="1.6"        <!-- вертикальное соотношение -->
+        width="0.25"
+        height="0.45"
+      ></a-video>
+    </a-entity>
+
+    <!-- Видео 2 -->
+    <a-entity id="container2" visible="false">
+      <a-video
+        src="#video2"
+        position="0.6 0 -3"    <!-- немного справа -->
+        rotation="0 0 0"
+        width="0.25"
+        height="0.45"
+      ></a-video>
+    </a-entity>
+
+    <!-- Видео 3 -->
+    <a-entity id="container3" visible="false">
+      <a-video
+        src="#video3"
+        position="-0.6 0.8 -3" <!-- левый верх -->
+        rotation="0 0 0"
+        width="0.25"
+        height="0.45"
+      ></a-video>
+    </a-entity>
+
+    <!-- Видео 4 -->
+    <a-entity id="container4" visible="false">
+      <a-video
+        src="#video4"
+        position="0.6 0.8 -3"  <!-- правый верх -->
+        rotation="0 0 0"
+        width="0.25"
+        height="0.45"
+      ></a-video>
+    </a-entity>
+
+    <!-- Видео 5 -->
+    <a-entity id="container5" visible="false">
+      <a-video
+        src="#video5"
+        position="0  -0.8 -3"  <!-- по центру снизу -->
+        rotation="0 0 0"
+        width="0.25"
+        height="0.45"
       ></a-video>
     </a-entity>
 
@@ -53,34 +176,51 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const marker = document.getElementById('marker');
-      const video = document.getElementById('myVideo');
-      const container = document.getElementById('videoContainer');
+      // Маркеры
+      const markers = [
+        { markerId: 'marker1', videoId: 'video1', containerId: 'container1' },
+        { markerId: 'marker2', videoId: 'video2', containerId: 'container2' },
+        { markerId: 'marker3', videoId: 'video3', containerId: 'container3' },
+        { markerId: 'marker4', videoId: 'video4', containerId: 'container4' },
+        { markerId: 'marker5', videoId: 'video5', containerId: 'container5' },
+      ];
 
-      let markerTriggered = false;
-      let audioEnabled = false;
+      let activeIndex = null;       // какой сейчас активен для звука
+      let audioEnabled = false;     // включали ли звук уже
 
-      marker.addEventListener('markerFound', async () => {
-        if (markerTriggered) return;
-        markerTriggered = true;
+      // Для каждого маркера: при первом детекте показать свой экран и запустить видео без звука
+      markers.forEach((conf, index) => {
+        const marker = document.getElementById(conf.markerId);
+        const video = document.getElementById(conf.videoId);
+        const container = document.getElementById(conf.containerId);
 
-        container.setAttribute('visible', 'true');
-        video.muted = true;
-        try {
-          await video.play();
-        } catch (e) {
-          console.log('Автозапуск не сработал:', e);
-        }
+        let triggered = false;
+
+        marker.addEventListener('markerFound', async () => {
+          if (triggered) return;
+          triggered = true;
+          container.setAttribute('visible', 'true');
+          video.muted = true;
+          try {
+            await video.play();
+          } catch (e) {
+            console.log('Автозапуск не сработал для', conf.videoId, e);
+          }
+          // последний увиденный маркер — активный для звука
+          activeIndex = index;
+        });
       });
 
+      // Один тап по экрану → включаем звук у последнего активного видео
       window.addEventListener('click', async () => {
-        if (!markerTriggered || audioEnabled) return;
+        if (activeIndex === null) return;
+        const conf = markers[activeIndex];
+        const video = document.getElementById(conf.videoId);
         try {
           video.muted = false;
           await video.play();
-          audioEnabled = true;
         } catch (e) {
-          console.log('Не удалось включить звук:', e);
+          console.log('Не удалось включить звук для', conf.videoId, e);
         }
       });
     });
