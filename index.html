@@ -7,11 +7,11 @@
 </head>
 <body style="margin:0; padding:0; overflow:hidden;">
 
-  <!-- Кнопка запуска -->
+  <!-- Кнопка запуска (изначально скрыта, покажем когда увидим QR) -->
   <button id="startBtn"
           style="position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);
-                 padding:12px 20px;font-size:16px;">
-    Начать видео
+                 padding:12px 20px;font-size:16px;display:none;">
+    Запустить видео
   </button>
 
   <a-scene
@@ -28,13 +28,12 @@
         id="myVideo"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
         loop
-        muted
         playsinline
         crossorigin="anonymous"
       ></video>
     </a-assets>
 
-    <!-- Маркер НУЖЕН только для первого детекта (можно даже убрать позже) -->
+    <!-- QR-маркер: только для детекта -->
     <a-marker
       id="marker"
       type="pattern"
@@ -43,12 +42,12 @@
     >
     </a-marker>
 
-    <!-- Экран видео фиксированно перед камерой, НЕ привязан к маркеру -->
+    <!-- Экран видео фиксирован перед камерой, по умолчанию скрыт -->
     <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 -2"   <!-- 2 метра перед камерой -->
+        position="0 0 -2"
         rotation="0 0 0"
         width="3"
         height="1.6875"
@@ -60,16 +59,32 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const marker = document.getElementById('marker');
       const startBtn = document.getElementById('startBtn');
       const video = document.getElementById('myVideo');
       const container = document.getElementById('videoContainer');
 
+      let markerSeen = false;
+      let videoStarted = false;
+
+      // 1. Показать кнопку, когда QR найден впервые
+      marker.addEventListener('markerFound', () => {
+        if (!markerSeen && !videoStarted) {
+          markerSeen = true;
+          startBtn.style.display = 'block';
+        }
+      });
+
+      // 2. По клику запускаем видео + показываем экран перед камерой
       startBtn.addEventListener('click', async () => {
         try {
-          // user gesture → разрешает play() на мобилках
-          await video.play();
+          // включаем звук
+          video.muted = false;
+
+          await video.play();           // user gesture → звук разрешён
           container.setAttribute('visible', 'true');
           startBtn.style.display = 'none';
+          videoStarted = true;
         } catch (e) {
           console.log('Не удалось запустить видео:', e);
         }
