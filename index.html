@@ -6,6 +6,7 @@
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 <body style="margin:0; padding:0; overflow:hidden;">
+
   <a-scene
     embedded
     vr-mode-ui="enabled: false"
@@ -19,12 +20,10 @@
           smoothThreshold: 5;"
   >
 
-    <!-- Видео в assets -->
     <a-assets>
       <video
         id="myVideo"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
-        autoplay
         loop
         muted
         playsinline
@@ -32,23 +31,62 @@
       ></video>
     </a-assets>
 
-    <!-- Кастомный QR-маркер -->
+    <!-- Маркер только для определения стартовой позиции -->
     <a-marker
+      id="marker"
       type="pattern"
       url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr.patt"
       smooth="true"
     >
+    </a-marker>
+
+    <!-- Статичный контейнер для видео, не «прибит» к маркеру -->
+    <a-entity id="videoContainer" visible="false">
       <a-video
+        id="videoPlane"
         src="#myVideo"
         position="0 0 0"
         rotation="-90 0 0"
-        scale="2.5 2.5 2.5"
-        width="1.6875"
-        height="3"
+        scale="2 2 2"
+        width="3"
+        height="1.6875"
       ></a-video>
-    </a-marker>
+    </a-entity>
 
     <a-entity camera></a-entity>
   </a-scene>
+
+  <script>
+    // Ждём загрузки сцены
+    document.addEventListener('DOMContentLoaded', () => {
+      const marker = document.querySelector('#marker');
+      const container = document.querySelector('#videoContainer');
+      const videoEl = document.querySelector('#myVideo');
+
+      let started = false;
+
+      marker.addEventListener('markerFound', () => {
+        if (started) return; // только один раз
+
+        // Берём мировую позицию/вращение маркера
+        const markerObj = marker.object3D;
+        const containerObj = container.object3D;
+
+        markerObj.getWorldPosition(containerObj.position);
+        markerObj.getWorldQuaternion(containerObj.quaternion);
+
+        container.setAttribute('visible', 'true');
+
+        // Стартуем видео по user gesture (обычно уже был тап)
+        videoEl.play().catch(() => {
+          // если браузер ругается — можно попросить юзера тапнуть по экрану
+          console.log('Нужно взаимодействие пользователя для старта видео');
+        });
+
+        started = true;
+      });
+    });
+  </script>
+
 </body>
 </html>
