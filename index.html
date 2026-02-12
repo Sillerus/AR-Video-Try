@@ -28,7 +28,6 @@
       ></video>
     </a-assets>
 
-    <!-- QR-маркер -->
     <a-marker
       id="marker"
       type="pattern"
@@ -40,8 +39,8 @@
         src="#myVideo"
         position="0 0 0"
         rotation="-90 0 0"
-        width="3"
-        height="1.6875"
+        width="1.2"      <!-- уже -->
+        height="2.1"     <!-- выше: вертикальный прямоугольник -->
       ></a-video>
     </a-marker>
 
@@ -53,22 +52,19 @@
       const marker = document.getElementById('marker');
       const video = document.getElementById('myVideo');
 
-      // Автоплей (без звука) при появлении маркера
       marker.addEventListener('markerFound', () => {
         if (video.paused) {
-          video.muted = true;    // важно для автоплея
+          video.muted = true;
           video.play().catch(() => {});
         }
       });
 
-      // Остановка, если маркер потерян
       marker.addEventListener('markerLost', () => {
         if (!video.paused) {
           video.pause();
         }
       });
 
-      // Один тап по экрану — включаем звук (если видео уже идёт)
       window.addEventListener('click', () => {
         if (!video.paused) {
           video.muted = false;
