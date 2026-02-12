@@ -22,12 +22,13 @@
         id="myVideo"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
         loop
+        muted
         playsinline
         crossorigin="anonymous"
       ></video>
     </a-assets>
 
-    <!-- QR-маркер: только триггер, на нём ничего не рисуем -->
+    <!-- QR-маркер — только триггер -->
     <a-marker
       id="marker"
       type="pattern"
@@ -37,15 +38,15 @@
     >
     </a-marker>
 
-    <!-- Небольшой вертикальный экран фиксирован перед камерой -->
+    <!-- Маленький вертикальный экран фиксирован перед камерой -->
     <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 -1.5"  <!-- 1.5 м перед камерой -->
+        position="0 0 -1.5"   <!-- расстояние перед камерой -->
         rotation="0 0 0"
-        width="0.6"          <!-- небольшой вертикальный прямоугольник -->
-        height="1.1"
+        width="0.45"          <!-- уменьшенный размер -->
+        height="0.8"
       ></a-video>
     </a-entity>
 
@@ -59,24 +60,31 @@
       const container = document.getElementById('videoContainer');
 
       let markerTriggered = false;
-      let videoStarted = false;
+      let audioEnabled = false;
 
-      // 1) Один раз: навёл на QR → показываем экран перед камерой
-      marker.addEventListener('markerFound', () => {
+      // 1) Навёл на QR первый раз → показываем экран и запускаем видео (без звука)
+      marker.addEventListener('markerFound', async () => {
         if (markerTriggered) return;
-        container.setAttribute('visible', 'true');
         markerTriggered = true;
+
+        container.setAttribute('visible', 'true');
+        video.muted = true;
+        try {
+          await video.play();           // автоплей БЕЗ звука разрешён
+        } catch (e) {
+          console.log('Автозапуск не сработал:', e);
+        }
       });
 
-      // 2) Первый тап по экрану → запускаем видео со звуком
+      // 2) Первый тап по экрану → включаем звук
       window.addEventListener('click', async () => {
-        if (!markerTriggered || videoStarted) return;
+        if (!markerTriggered || audioEnabled) return;
         try {
           video.muted = false;
-          await video.play();
-          videoStarted = true;
+          await video.play();           // перезапуск уже с аудио после user gesture
+          audioEnabled = true;
         } catch (e) {
-          console.log('Ошибка запуска видео:', e);
+          console.log('Не удалось включить звук:', e);
         }
       });
     });
