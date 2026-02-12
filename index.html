@@ -16,9 +16,9 @@
           debugUIEnabled: false;"
   >
 
-    <!-- ВСЕ ВИДЕО-РЕСУРСЫ
+    <!-- ВСЕ ВИДЕО-РЕСУРСЫ -->
      <a-assets>
-      <!-- Видео 1 (текущее)
+      <!-- Видео 1 (текущее) -->
       <video
         id="video1"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
@@ -26,7 +26,7 @@
         muted
         playsinline
         crossorigin="anonymous"
-      ></video> -->
+      ></video>
 
       <!-- Видео 2 -->
       <video
@@ -61,7 +61,7 @@
       <!-- Видео 5 -->
       <video
         id="video5"
-        src="https://raw.githack.com/Sillerus/AR-Video-Try/main/Videos/IMG_3492.MP4?raw=true"
+        src="https://raw.githack.com/Sillerus/AR-Video-Try/main/Videos/IMG_3485.MP4"
         loop
         muted
         playsinline
@@ -70,20 +70,20 @@
     </a-assets>
 
     <!-- МАРКЕРЫ (QR-паттерны) -->
-    <!-- Маркер 1
+    <!-- Маркер 1 -->
     <a-marker
       id="marker1"
       type="pattern"
       url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr.patt"
       smooth="true"
       emitevents="true"
-    ></a-marker> -->
+    ></a-marker>
 
     <!-- Маркер 2 -->
     <a-marker
       id="marker2"
       type="pattern"
-      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/patt/pattern-qr-2.patt"
+      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/patt/pattern-qr-5.patt"
       smooth="true"
       emitevents="true"
     ></a-marker>
@@ -110,7 +110,7 @@
     <a-marker
       id="marker5"
       type="pattern"
-      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/patt/pattern-qr-5.patt"
+      url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/patt/pattern-qr-2.patt"
       smooth="true"
       emitevents="true"
     ></a-marker>
@@ -133,7 +133,7 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const configs = [
-      //{ markerId: 'marker1', videoId: 'video1' },
+      { markerId: 'marker1', videoId: 'video1' },
       { markerId: 'marker2', videoId: 'video2' },
       { markerId: 'marker3', videoId: 'video3' },
       { markerId: 'marker4', videoId: 'video4' },
@@ -144,7 +144,7 @@
     const videoPlane = document.getElementById('videoPlane');
 
     const videos = {
-      //video1: document.getElementById('video1'),
+      video1: document.getElementById('video1'),
       video2: document.getElementById('video2'),
       video3: document.getElementById('video3'),
       video4: document.getElementById('video4'),
