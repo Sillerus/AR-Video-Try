@@ -16,7 +16,6 @@
           debugUIEnabled: false;"
   >
 
-    <!-- Видео-ресурс -->
     <a-assets>
       <video
         id="myVideo"
@@ -28,7 +27,6 @@
       ></video>
     </a-assets>
 
-    <!-- QR-маркер — только триггер -->
     <a-marker
       id="marker"
       type="pattern"
@@ -38,15 +36,15 @@
     >
     </a-marker>
 
-    <!-- Маленький вертикальный экран фиксирован перед камерой -->
+    <!-- Экран примерно с размер QR -->
     <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 -1.5"   <!-- расстояние перед камерой -->
+        position="0 0 -3"    <!-- дальше от камеры -->
         rotation="0 0 0"
-        width="0.45"          <!-- уменьшенный размер -->
-        height="0.8"
+        width="0.25"         <!-- ширина примерно как QR 5–6 см -->
+        height="0.45"        <!-- вертикальное соотношение -->
       ></a-video>
     </a-entity>
 
@@ -62,7 +60,6 @@
       let markerTriggered = false;
       let audioEnabled = false;
 
-      // 1) Навёл на QR первый раз → показываем экран и запускаем видео (без звука)
       marker.addEventListener('markerFound', async () => {
         if (markerTriggered) return;
         markerTriggered = true;
@@ -70,18 +67,17 @@
         container.setAttribute('visible', 'true');
         video.muted = true;
         try {
-          await video.play();           // автоплей БЕЗ звука разрешён
+          await video.play();
         } catch (e) {
           console.log('Автозапуск не сработал:', e);
         }
       });
 
-      // 2) Первый тап по экрану → включаем звук
       window.addEventListener('click', async () => {
         if (!markerTriggered || audioEnabled) return;
         try {
           video.muted = false;
-          await video.play();           // перезапуск уже с аудио после user gesture
+          await video.play();
           audioEnabled = true;
         } catch (e) {
           console.log('Не удалось включить звук:', e);
