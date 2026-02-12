@@ -7,17 +7,20 @@
 </head>
 <body style="margin:0; padding:0; overflow:hidden;">
 
+  <!-- Кнопка запуска -->
+  <button id="startBtn"
+          style="position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);
+                 padding:12px 20px;font-size:16px;">
+    Начать видео
+  </button>
+
   <a-scene
     embedded
     vr-mode-ui="enabled: false"
     renderer="logarithmicDepthBuffer: true;"
     arjs="sourceType: webcam;
           trackingMethod: best;
-          debugUIEnabled: false;
-          smooth: true;
-          smoothCount: 10;
-          smoothTolerance: 0.01;
-          smoothThreshold: 5;"
+          debugUIEnabled: false;"
   >
 
     <a-assets>
@@ -31,7 +34,7 @@
       ></video>
     </a-assets>
 
-    <!-- Маркер только для определения стартовой позиции -->
+    <!-- Маркер НУЖЕН только для первого детекта (можно даже убрать позже) -->
     <a-marker
       id="marker"
       type="pattern"
@@ -40,50 +43,36 @@
     >
     </a-marker>
 
-    <!-- Статичный контейнер для видео, не «прибит» к маркеру -->
+    <!-- Экран видео фиксированно перед камерой, НЕ привязан к маркеру -->
     <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 0"
-        rotation="-90 0 0"
-        scale="2 2 2"
+        position="0 0 -2"   <!-- 2 метра перед камерой -->
+        rotation="0 0 0"
         width="3"
         height="1.6875"
       ></a-video>
     </a-entity>
 
-    <a-entity camera></a-entity>
+    <a-entity id="camera" camera></a-entity>
   </a-scene>
 
   <script>
-    // Ждём загрузки сцены
     document.addEventListener('DOMContentLoaded', () => {
-      const marker = document.querySelector('#marker');
-      const container = document.querySelector('#videoContainer');
-      const videoEl = document.querySelector('#myVideo');
+      const startBtn = document.getElementById('startBtn');
+      const video = document.getElementById('myVideo');
+      const container = document.getElementById('videoContainer');
 
-      let started = false;
-
-      marker.addEventListener('markerFound', () => {
-        if (started) return; // только один раз
-
-        // Берём мировую позицию/вращение маркера
-        const markerObj = marker.object3D;
-        const containerObj = container.object3D;
-
-        markerObj.getWorldPosition(containerObj.position);
-        markerObj.getWorldQuaternion(containerObj.quaternion);
-
-        container.setAttribute('visible', 'true');
-
-        // Стартуем видео по user gesture (обычно уже был тап)
-        videoEl.play().catch(() => {
-          // если браузер ругается — можно попросить юзера тапнуть по экрану
-          console.log('Нужно взаимодействие пользователя для старта видео');
-        });
-
-        started = true;
+      startBtn.addEventListener('click', async () => {
+        try {
+          // user gesture → разрешает play() на мобилках
+          await video.play();
+          container.setAttribute('visible', 'true');
+          startBtn.style.display = 'none';
+        } catch (e) {
+          console.log('Не удалось запустить видео:', e);
+        }
       });
     });
   </script>
