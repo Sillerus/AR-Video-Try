@@ -16,6 +16,7 @@
           debugUIEnabled: false;"
   >
 
+    <!-- Видео-ресурс -->
     <a-assets>
       <video
         id="myVideo"
@@ -26,23 +27,25 @@
       ></video>
     </a-assets>
 
+    <!-- QR-маркер: только триггер, на нём ничего не рисуем -->
     <a-marker
       id="marker"
       type="pattern"
       url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr.patt"
       smooth="true"
+      emitevents="true"
     >
     </a-marker>
 
+    <!-- Небольшой вертикальный экран фиксирован перед камерой -->
     <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 -1.5"
+        position="0 0 -1.5"  <!-- 1.5 м перед камерой -->
         rotation="0 0 0"
-        width="0.6"
+        width="0.6"          <!-- небольшой вертикальный прямоугольник -->
         height="1.1"
-        class="clickable"
       ></a-video>
     </a-entity>
 
@@ -54,32 +57,26 @@
       const marker = document.getElementById('marker');
       const video = document.getElementById('myVideo');
       const container = document.getElementById('videoContainer');
-      const videoPlane = document.getElementById('videoPlane');
 
-      let markerSeen = false;
-      let playing = false;
+      let markerTriggered = false;
+      let videoStarted = false;
 
-      // Показываем экран только после первого сканирования QR
+      // 1) Один раз: навёл на QR → показываем экран перед камерой
       marker.addEventListener('markerFound', () => {
-        if (!markerSeen) {
-          markerSeen = true;
-          container.setAttribute('visible', 'true');
-        }
+        if (markerTriggered) return;
+        container.setAttribute('visible', 'true');
+        markerTriggered = true;
       });
 
-      // ОДИН клик по самому видео: старт с звуком
-      videoPlane.addEventListener('click', async () => {
+      // 2) Первый тап по экрану → запускаем видео со звуком
+      window.addEventListener('click', async () => {
+        if (!markerTriggered || videoStarted) return;
         try {
-          if (!playing) {
-            video.muted = false;
-            await video.play();
-            playing = true;
-          } else {
-            video.pause();
-            playing = false;
-          }
+          video.muted = false;
+          await video.play();
+          videoStarted = true;
         } catch (e) {
-          console.log('Ошибка play():', e);
+          console.log('Ошибка запуска видео:', e);
         }
       });
     });
