@@ -20,7 +20,6 @@
       <video
         id="myVideo"
         src="https://raw.githack.com/Sillerus/AR-Video-Try/main/IMG_5706.mp4"
-        autoplay
         loop
         muted
         playsinline
@@ -28,47 +27,58 @@
       ></video>
     </a-assets>
 
+    <!-- QR-маркер: только триггер, на нём ничего не рисуем -->
     <a-marker
       id="marker"
       type="pattern"
       url="https://raw.githubusercontent.com/Sillerus/AR-Video-Try/refs/heads/main/pattern-qr.patt"
       smooth="true"
     >
+    </a-marker>
+
+    <!-- Экран видео фиксирован ПЕРЕД камерой, независим от маркера -->
+    <a-entity id="videoContainer" visible="false">
       <a-video
         id="videoPlane"
         src="#myVideo"
-        position="0 0 0"
-        rotation="-90 0 0"
-        width="1.2"      <!-- уже -->
-        height="2.1"     <!-- выше: вертикальный прямоугольник -->
+        position="0 0 -2"     <!-- 2 метра перед камерой -->
+        rotation="0 0 0"
+        width="0.9"           <!-- компактный вертикальный экран -->
+        height="1.6"
       ></a-video>
-    </a-marker>
+    </a-entity>
 
-    <a-entity camera></a-entity>
+    <a-entity id="camera" camera></a-entity>
   </a-scene>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const marker = document.getElementById('marker');
       const video = document.getElementById('myVideo');
+      const container = document.getElementById('videoContainer');
 
-      marker.addEventListener('markerFound', () => {
-        if (video.paused) {
-          video.muted = true;
-          video.play().catch(() => {});
+      let started = false;
+      let unmuted = false;
+
+      // 1) Один раз сканируем QR → показываем экран и запускаем видео (без звука)
+      marker.addEventListener('markerFound', async () => {
+        if (started) return;
+        container.setAttribute('visible', 'true');
+        video.muted = true;
+        try {
+          await video.play();   // автоплей без звука допустим
+          started = true;
+        } catch (e) {
+          console.log('Не удалось автозапустить видео:', e);
         }
       });
 
-      marker.addEventListener('markerLost', () => {
-        if (!video.paused) {
-          video.pause();
-        }
-      });
-
+      // 2) Первый тап по экрану после старта → включаем звук
       window.addEventListener('click', () => {
-        if (!video.paused) {
-          video.muted = false;
-        }
+        if (!started || unmuted) return;
+        video.muted = false;
+        video.play().catch(() => {});
+        unmuted = true;
       });
     });
   </script>
